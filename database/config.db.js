@@ -1,19 +1,14 @@
 const mongoose = require('mongoose');
 
 const dbConnection = async()=>{
-  try{
-
-    await mongoose.connect(process.env.MONGODB_CNN,{
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex:true,
-      useFindAndModify:false
+  mongoose.connect(process.env.MONGODB_CNN,
+    err => {
+        if(err){ 
+          console.log(err);
+          throw err
+        };
+        console.log('connected to MongoDB')
     });
-    console.log('database online');
-
-  }catch(error){
-    throw new Error('Error at initialize DB process');
-  }
 }
 module.exports = {
   dbConnection
