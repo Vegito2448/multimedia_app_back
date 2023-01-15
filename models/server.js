@@ -12,14 +12,16 @@ class Server{
     //Conn DB
     this.DBConnect();
 
-    //Middlewares
+    //Middleware's
     this.middlewares();
     // App routes
     this.routes();
   }
+  
   async DBConnect(){
     await dbConnection();
   }
+  
   middlewares(){
     // CORS
     this.app.use(cors());
@@ -33,11 +35,11 @@ class Server{
 
   routes(){
     this.app.use(this.usersPath, require('../routes/user.routes'));
-  }
+  } 
 
   listen(){
     this.app.listen(this.port, ()=>{
-      console.log('Server runing in port: ', this.port);
+      console.log('Server running at port: ', this.port);
     })
   }
 
