@@ -15,9 +15,13 @@ const existsUserById = async(id)=>{
 	const existsUser = await User.findOne({id});
   if(!existsUser) throw new Error(`id: ${id} do not exists`);
 };
+const isANumber = async (number) => {
+  if (isNaN(number) && !Number.isInteger()) throw new Error(`Number: ${number} provider is not valid`);
+}
 
 module.exports = {
   isRoleValid,
   emailExists,
-  existsUserById
+  existsUserById,
+  isANumber
 }

@@ -1,4 +1,4 @@
-import { response, request } from 'express';
+const { request, response } = require('express');
 const bcryptjs = require('bcryptjs');
 
 
@@ -8,14 +8,14 @@ const usersGet = async (req = request, res = response) => {
 	const { limit = 5, from = 0 } = req.query;
 	const query = { status: true };
 
-	const [total, users] = await Promise.all([User.countDocuments(query), User.find(query).skip(Number(from)).limit(Number(limit))]);
+	const [total, users] = await Promise.all([User.countDocuments(query), User.find(query).skip(parseInt(from)).limit(parseInt(limit))]);
 
 	res.json({
 		total,
 		users,
 	});
 };
-const usersPost = async (req, res) => {
+const usersPost = async (req = request, res = response) => {
 	const { name, mail, password, role } = req.body;
 
 	const user = new User({ name, mail, password, role });
@@ -34,7 +34,7 @@ const usersPost = async (req, res) => {
 		user,
 	});
 };
-const usersPut = async (req, res) => {
+const usersPut = async (req = request, res = response) => {
 	const { id } = req.params.id;
 	const { _id, password, google, mail, ...rest } = req.body;
 
@@ -47,14 +47,14 @@ const usersPut = async (req, res) => {
 	}
 	const user = await User().findByIdAndUpdate(id, rest);
 
-	res.json({ user });
+	res.json({ msg: 'PUT API - Controller', user });
 };
-const usersPatch = (req, res = response) => {
+const usersPatch = (req = request, res = response = response) => {
 	res.json({
 		msg: 'patch API - Controller',
 	});
 };
-const usersDelete = async (req, res = response) => {
+const usersDelete = async (req = request, res = response = response) => {
 	const { id } = req.params;
 
 	//fisical delete this action is'nt recommended

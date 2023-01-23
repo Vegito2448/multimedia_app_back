@@ -1,18 +1,24 @@
-import { Router } from 'express';
-import { check } from 'express-validator';
+const { Router } = require('express');
+const { check } = require('express-validator');
 
 const { validateFields } = require('../middlewares/validate-fields');
-const { isRoleValid, emailExists, existsUserById } = require('../helpers/db-validators');
+const { isRoleValid, emailExists, existsUserById, isANumber } = require('../helpers/db-validators');
 
 const { usersGet, usersDelete, usersPut, usersPatch, usersPost } = require('../controllers/users.controller');
 
 const router = Router();
 
-router.get('/', usersGet);
+router.get('/',
+	[check('from').custom(isANumber),
+	check('limit').custom(isANumber)],
+	usersGet);
 
 router.put(
 	'/:id',
-	[check('id', 'is not a valid ID').isMongoId(), check('id').custom(existsUserById), check('role').custom(isRoleValid), validateFields],
+	[check('id', 'is not a valid ID').isMongoId(),
+		check('id').custom(existsUserById),
+		check('role').custom(isRoleValid),
+		validateFields],
 	usersPut
 );
 
