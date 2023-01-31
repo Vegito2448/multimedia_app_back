@@ -1,7 +1,13 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { validateFields } = require('../middlewares/validate-fields');
+const {
+	validateFields,
+	validateJWT,
+	isAdminRole,
+	hasRole
+} = require('../middlewares');
+
 const { isRoleValid, emailExists, existsUserById, isANumber } = require('../helpers/db-validators');
 
 const { usersGet, usersDelete, usersPut, usersPatch, usersPost } = require('../controllers/users.controller');
@@ -36,7 +42,14 @@ router.post(
 	usersPost
 );
 
-router.delete('/:id', [check('id', 'is not a valid ID').isMongoId(), check('id').custom(existsUserById), validateFields], usersDelete);
+router.delete('/:id', [
+	validateJWT,
+	// isAdminRole this middleware force to user to have ADMIN Permissions,
+	hasRole('ADMIN_ROLE', 'SALES_ROLE'),
+	check('id', 'is not a valid ID').isMongoId(),
+	check('id').custom(existsUserById),
+	validateFields
+], usersDelete);
 
 router.patch('/', usersPatch);
 

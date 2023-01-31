@@ -62,8 +62,9 @@ const usersDelete = async (req = request, res = response = response) => {
 
 	//Change status user
 	const user = await User.findByIdAndUpdate(id, { status: false });
+	user.status = false;
 
-	res.json(user);
+	res.json({ user });
 };
 
 module.exports = {
