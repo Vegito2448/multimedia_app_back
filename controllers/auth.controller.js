@@ -57,6 +57,19 @@ const login = async (req = request, res = response) => {
 
 };
 
+const googleSignIn = async (req = request, res = response) => {
+
+	const { id_token } = req.body;
+	console.log("🚀 ~ file: auth.controller.js:64 ~ googleSignIn ~ req.body", req.body);
+	console.log("🚀 ~ file: auth.controller.js:62 ~ googleSignIn ~ id_token", id_token);
+	res.json({
+		msg: "Everything is ok Google SignIn",
+		id_token
+	});
+
+}
+
 module.exports = {
 	login,
+	googleSignIn
 };

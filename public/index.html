@@ -5,12 +5,34 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Access Denied</title>
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+  <title>Google SignIn</title>
 </head>
 
 <body>
+  <h1>Google SignIn</h1>
+  <div id="g_id_onload" data-client_id="252424079654-kbguigs2nd60ss60hvus68pmeqa90m82.apps.googleusercontent.com"
+    data-context="signin" data-ux_mode="popup" data-callback="onSignIn" data-auto_prompt="false">
+  </div>
+  
+  <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with"
+    data-size="large" data-logo_alignment="left">
+  </div>
+  
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script type="text/javascript">
 
-  <h1>Access Denied</h1>
+    function onSignIn({ credential }) {
+      const data = { id_token: credential };
+
+              fetch(`${location.origin}/api/auth/google`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              }).then(resp => resp.json()).then(data => console.log('Our Sv', data)).catch(console.log);
+
+            }
+          </script>
 
 </body>
 

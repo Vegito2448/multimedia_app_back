@@ -7,7 +7,7 @@ const { validateFields } = require('../middlewares/validate-fields');
 
 const { isRoleValid, emailExists, existsUserById, isANumber } = require('../helpers/db-validators');
 
-const { login } = require('../controllers/auth.controller');
+const { login, googleSignIn } = require('../controllers/auth.controller');
 
 
 router.post('/login', [
@@ -15,6 +15,11 @@ router.post('/login', [
 	check('password', "password is Mandatory").not().isEmpty(),
 	validateFields,
 ], login);
+
+router.post('/google', [
+	// check('id_token', "The id_token is necessary").not().isEmpty(),
+	validateFields
+], googleSignIn)
 
 
 module.exports = router;
