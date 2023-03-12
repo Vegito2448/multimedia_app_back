@@ -49,12 +49,12 @@ const usersPut = async (req = request, res = response) => {
 
 	res.json({ msg: 'PUT API - Controller', user });
 };
-const usersPatch = (req = request, res = response = response) => {
+const usersPatch = (req = request, res = response) => {
 	res.json({
 		msg: 'patch API - Controller',
 	});
 };
-const usersDelete = async (req = request, res = response = response) => {
+const usersDelete = async (req = request, res = response) => {
 	const { id } = req.params;
 
 	//fisical delete this action is'nt recommended
