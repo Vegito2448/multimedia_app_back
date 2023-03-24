@@ -1,5 +1,4 @@
-const Role = require('../models/role');
-const User = require('../models/user');
+const { Category, Role, User, Product } = require('../models');
 
 const isRoleValid = async(role = '')=>{
     const existsRole = await Role.findOne({role});
@@ -17,6 +16,22 @@ const existsUserById = async (_id) => {
   const existsUser = await User.findOne({ _id });
   if (!existsUser) throw new Error(`id: ${_id} do not exists or is not Valid`);
 };
+
+const existsCategory = async (_id) => {
+  console.log("🚀 ~ file: db-validators.js:22 ~ existsCategory ~ _id:", _id);
+
+  //verified if mail exist
+  const existsCat = await Category.findOne({ _id });
+  if (!existsCat) throw new Error(`id: ${_id} do not exists or is not Valid`);
+};
+const existsProduct = async (_id) => {
+  console.log("🚀 ~ file: db-validators.js:22 ~ existsCategory ~ _id:", _id);
+
+  //verified if mail exist
+  const modelFound = await Product.findOne({ _id });
+  if (!modelFound) throw new Error(`id: ${_id} do not exists in the Data of: ${modelName} or is not Valid`);
+};
+
 const isANumber = async (number) => {
   if (isNaN(number) && !Number.isInteger()) throw new Error(`Number: ${number} provider is not valid`);
 }
@@ -25,5 +40,7 @@ module.exports = {
   isRoleValid,
   emailExists,
   existsUserById,
-  isANumber
+  isANumber,
+  existsCategory,
+  existsProduct
 }

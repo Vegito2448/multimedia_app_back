@@ -5,8 +5,6 @@ const router = Router();
 
 const { validateFields } = require('../middlewares/validate-fields');
 
-const { isRoleValid, emailExists, existsUserById, isANumber } = require('../helpers/db-validators');
-
 const { login, googleSignIn } = require('../controllers/auth.controller');
 
 
