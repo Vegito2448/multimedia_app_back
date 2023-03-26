@@ -18,7 +18,6 @@ const getCategories = async (req = request, res = response) => {
 
 	} catch (error) {
 
-		console.log("🚀 ~ file: categories.controller.js:12 ~ getCategory ~ error:", error);
 		throw new Error(res.status(500).json({
 			msg: 'has been an error, talk with backend administrator'
 		}));
@@ -32,7 +31,6 @@ const getCategory = async (req = request, res = response) => {
 		const category = await Category.findById(id).populate('user', 'name');
 		return res.status(200).json(category);
 	} catch (error) {
-		console.log("🚀 ~ file: categories.controller.js:12 ~ getCategory ~ error:", error);
 		throw new Error(res.status(500).json({
 			msg: 'has been an error, talk with backend administrator'
 		}));
@@ -69,7 +67,7 @@ const createCategory = async (req = request, res = response) => {
 
 
 	} catch (error) {
-		console.log("🚀 ~ file: categories.controller.js:37 ~ createCategory ~ error:", error);
+
 		throw new Error(res.status(500).json({
 			msg: 'has been an error, talk with backend administrator'
 		}));
@@ -95,7 +93,7 @@ const updateCategory = async (req = request, res = response) => {
 
 	} catch (error) {
 
-		console.log("🚀 ~ file: categories.controller.js:37 ~ createCategory ~ error:", error);
+
 		throw new Error(res.status(500).json({
 			msg: `has been an error:\n${error}, talk with backend administrator`
 		}));
@@ -113,7 +111,7 @@ const deleteCategory = async (req = request, res = response) => {
 			msg: 'Category deleted'
 		});
 	} catch (error) {
-		console.log("🚀 ~ file: categories.controller.js:12 ~ getCategory ~ error:", error);
+
 		throw new Error(res.status(500).json({
 			msg: 'has been an error, talk with backend administrator'
 		}));
