@@ -36,7 +36,19 @@ const isANumber = async (number) => {
   if (isNaN(number) && !Number.isInteger()) throw new Error(`Number: ${number} provider is not valid`);
 }
 
+/*
+  *validate Allowed Collections
+*/
+const allowedCollections = (collection = '', collections = []) => {
+  const include = collections.includes(collection);
+  if (!include)
+    throw new Error(`the collection: ${collection} isn't allowed, allowed collections: ${collections}`);
+  return true;
+}
+
+
 module.exports = {
+  allowedCollections,
   isRoleValid,
   emailExists,
   existsUserById,

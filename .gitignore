@@ -88,3 +88,8 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Ignorar todos los archivos en la carpeta uploads
+uploads/*
+
+# No ignorar archivos .md en la carpeta uploads
+!uploads/*.md
