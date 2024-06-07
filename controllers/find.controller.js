@@ -1,102 +1,210 @@
 const { request, response } = require("express");
 const { ObjectId } = require("mongoose").Types;
 
-const { User, Category, Product } = require("../models");
+const { User, Category, Topic, Content } = require("../models");
 
 const allowedCollections = [
-  'categories',
-  'products',
-  'roles',
-  'users',
+  "categories",
+  "roles",
+  "users",
+  "topics",
+  "contents",
 ];
 
-const findUsers = async (term = '', res = response) => {
+const findUsers = async (term = "", res = response) => {
   const isMongoId = ObjectId.isValid(term);
 
   if (isMongoId) {
     const user = await User.findById(term);
     return res.json({
-      results: (user) ? [user] : []
+      results: user ? [user] : [],
     });
   }
 
-  const regex = new RegExp(term, 'i');
+  const regex = new RegExp(term, "i");
 
   const users = await User.find({
-    $or: [{ name: regex }, { email: regex }],
-    $and: [{ status: true }]
+    $or: [
+      { name: regex },
+      { mail: regex },
+      { role: regex },
+      { userName: regex },
+    ],
+    $and: [{ status: true }],
   });
 
   return res.json({
     quantity: users.length,
-    results: users
+    results: users,
   });
 };
-const findProducts = async (term = '', res = response) => {
+
+const findContents = async (term = "", res = response) => {
   const isMongoId = ObjectId.isValid(term);
 
   if (isMongoId) {
-    const product = await Product.findById(term).populate('user', ['name', 'mail']).populate('category', 'name');
-    if (product)
+    const content = await Content.findById(term)
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"])
+      .populate("category", "name")
+      .populate("topic", "name");
+
+    if (content)
       return res.json({
-        results: (product) ? [product] : []
+        results: content ? [content] : [],
       });
-    const userProduct = await Product.find({ user: new ObjectId(term), status: true })
-      .populate('user', ['name', 'mail']).populate('category', 'name');
-    if (userProduct.length)
+
+    const userContent = await Content.find({
+      user: new ObjectId(term),
+      status: true,
+    })
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"])
+      .populate("category", "name")
+      .populate("topic", "name");
+
+    if (userContent.length)
       return res.json({
-        results: userProduct
+        results: userContent,
       });
-    const categoryProduct = await Product.find({ status: true, category: new ObjectId(term) })
-      .populate('category', 'name').populate('user', ['name', 'mail']);
+
+    const categoryContent = await Content.find({
+      status: true,
+      category: new ObjectId(term),
+    })
+      .populate("category", "name")
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"]);
+
     return res.json({
-      results: categoryProduct
+      results: categoryContent,
     });
   }
 
-  const regex = new RegExp(term, 'i');
+  const regex = new RegExp(term, "i");
 
-
-  const products = await Product.find({
-    $or: [{ name: regex }, { description: regex }, { price: term && !isNaN(term) && Number(term) }],
-    $and: [{ status: true }]
-  }).populate('user', ['name', 'mail']).populate('category', 'name');
+  const contents = await Content.find({
+    $or: [
+      { title: regex },
+      { description: regex },
+      { type: regex },
+      { url: regex },
+      { filePath: regex },
+    ],
+    $and: [{ status: true }],
+  })
+    .populate("createdBy", ["name", "mail"])
+    .populate("updatedBy", ["name", "mail"])
+    .populate("deletedBy", ["name", "mail"])
+    .populate("category", "name")
+    .populate("topic", "name");
 
   return res.json({
-    quantity: products.length,
-    results: products
+    quantity: contents.length,
+    results: contents,
   });
 };
-const findCategories = async (term = '', res = response) => {
+const findTopics = async (term = "", res = response) => {
   const isMongoId = ObjectId.isValid(term);
 
   if (isMongoId) {
-    const category = await Category.findById(term).populate('user', ['name', 'mail']);
-    if (category)
-      return res.json(category);
-    const userCategory = await Category.find()
-      .populate({
-        path: 'user',
-        match: { _id: term },
-        select: ['name', 'mail']
-      }).then(products => products.filter(category => category.user !== null));
-
+    const topic = await Topic.findById(term)
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"])
+      .populate("category", "name")
+      .populate("topic", "name");
+    if (topic)
+      return res.json({
+        results: topic ? [topic] : [],
+      });
+    const userTopic = await Topic.find({
+      user: new ObjectId(term),
+      status: true,
+    })
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"])
+      .populate("category", "name")
+      .populate("topic", "name");
+    if (userTopic.length)
+      return res.json({
+        results: userTopic,
+      });
+    const categoryTopic = await Topic.find({
+      status: true,
+      category: new ObjectId(term),
+    })
+      .populate("category", "name")
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"]);
     return res.json({
-      results: userCategory
+      results: categoryTopic,
     });
   }
 
-  const regex = new RegExp(term, 'i');
+  const regex = new RegExp(term, "i");
 
+  const contents = await Topic.find({
+    $or: [
+      { name: regex },
+      { description: regex },
+      { price: term && !isNaN(term) && Number(term) },
+    ],
+    $and: [{ status: true }],
+  })
+    .populate("createdBy", ["name", "mail"])
+    .populate("updatedBy", ["name", "mail"])
+    .populate("deletedBy", ["name", "mail"])
+    .populate("category", "name")
+    .populate("topic", "name");
+
+  return res.json({
+    quantity: contents.length,
+    results: contents,
+  });
+};
+const findCategories = async (term = "", res = response) => {
+  const isMongoId = ObjectId.isValid(term);
+
+  if (isMongoId) {
+    const category = await Category.findById(term).populate("user", [
+      "name",
+      "mail",
+    ]);
+    if (category) return res.json(category);
+    const userCategory = await Category.find()
+      .populate({
+        path: "user",
+        match: { _id: term },
+        select: ["name", "mail"],
+      })
+      .then((contents) =>
+        contents.filter((category) => category.user !== null)
+      );
+
+    return res.json({
+      results: userCategory,
+    });
+  }
+
+  const regex = new RegExp(term, "i");
 
   const categories = await Category.find({
     name: regex,
-    status: true
-  }).populate('user', ['name', 'mail']);
+    status: true,
+  })
+    .populate("createdBy", ["name", "mail"])
+    .populate("updatedBy", ["name", "mail"])
+    .populate("deletedBy", ["name", "mail"]);
 
   return res.json({
     quantity: categories.length,
-    results: categories
+    results: categories,
   });
 };
 
@@ -105,24 +213,24 @@ const find = (req = request, res = response) => {
 
   if (!allowedCollections.includes(collection) || !searchTerm) {
     res.status(400).json({
-      msg: `Allowed collections are: ${allowedCollections}. The collection: ${collection} is not allowed, and the search term is required`
+      msg: `Allowed collections are: ${allowedCollections}. The collection: ${collection} is not allowed, and the search term is required`,
     });
   }
 
   switch (collection) {
-    case 'categories':
+    case "categories":
       return findCategories(searchTerm, res);
-    case 'products':
-      return findProducts(searchTerm, res);
-    case 'users':
+    case "contents":
+      return findContents(searchTerm, res);
+    case "users":
       return findUsers(searchTerm, res);
+    case "topics":
+      return findTopics(searchTerm, res);
     default:
       return res.status(500).json({
-        msg: "This collection is not yet implemented"
+        msg: "This collection is not yet implemented",
       });
   }
-
-
 };
 module.exports = {
   find

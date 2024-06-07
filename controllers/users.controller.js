@@ -16,61 +16,76 @@ const usersGet = async (req = request, res = response) => {
 	});
 };
 const usersPost = async (req = request, res = response) => {
-	const { name, mail, password, role } = req.body;
+  // const { _id: createdBy } = req.user;
 
-	const user = new User({ name, mail, password, role });
+  const { name, mail, password, role, userName, createdBy } = req.body;
 
-	//Encrypt password
-	const salt = bcryptjs.genSaltSync();
+  const user = new User({ name, mail, password, role, userName, createdBy });
 
-	user.password = bcryptjs.hashSync(password, salt);
+  //Encrypt password
+  const salt = bcryptjs.genSaltSync();
 
-	//save in DB
+  user.password = bcryptjs.hashSync(password, salt);
+  user.createdBy = createdBy;
 
-	await user.save();
-
-	res.json({
-		msg: 'post API - Controller',
-		user,
-	});
+  try {
+    await user.save();
+    return res.status(201).json(user);
+  } catch (error) {
+    return res.status(500).json({
+      msg:
+        "has been an error, talk with backend administrator, error:" +
+        error.message,
+    });
+  }
 };
+
 const usersPut = async (req = request, res = response) => {
-	const { id } = req.params;
-	const { _id, password, google, mail, ...rest } = req.body;
+  const { _id: updatedBy } = req.user;
+  const { id } = req.params;
+  const { _id, google, password, ...rest } = req.body;
 
-	//TODO validate BD
-	if (password) {
-		//Encrypt password
-		const salt = bcryptjs.genSaltSync();
+  //TODO validate BD
+  if (password) {
+    //Encrypt password
+    const salt = bcryptjs.genSaltSync();
 
-		rest.password = bcryptjs.hashSync(password, salt);
-	}
-	const user = await User.findByIdAndUpdate(id, rest);
+    Object.assign(rest, {
+      updatedBy,
+      password: bcryptjs.hashSync(password, salt),
+    });
+  }
+  const user = await User.findByIdAndUpdate(id, rest)
+    .populate("updatedBy", "name")
+    .populate("createdBy", "name")
+    .populate("deletedBy", "name");
 
-	res.json({ msg: 'PUT API - Controller', user });
+  res.json({ msg: "User Updated", user });
 };
-const usersPatch = (req = request, res = response) => {
-	res.json({
-		msg: 'patch API - Controller',
-	});
-};
+
 const usersDelete = async (req = request, res = response) => {
-	const { id } = req.params;
+  const { id } = req.params;
+  const { _id: deletedBy } = req.user;
 
-	//fisical delete this action is'nt recommended
-	// const user = await User.findByIdAndDelete(id);
+  //Physical delete this action isn't recommended
+  // const user = await User.findByIdAndDelete(id);
 
-	//Change status user
-	const user = await User.findByIdAndUpdate(id, { status: false });
-	user.status = false;
+  //Change status user
+  const user = await User.findByIdAndUpdate(id, {
+    status: false,
+    deletedBy,
+    updatedBy: deletedBy,
+  })
+    .populate("deletedBy", "name")
+    .populate("createdBy", "name")
+    .populate("updatedBy", "name");
 
-	res.json({ user });
+  res.json({ user });
 };
 
 module.exports = {
-	usersGet,
-	usersPost,
-	usersPut,
-	usersPatch,
-	usersDelete,
+  usersGet,
+  usersPost,
+  usersPut,
+  usersDelete,
 };

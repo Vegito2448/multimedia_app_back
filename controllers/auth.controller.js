@@ -1,102 +1,102 @@
-const { request, response } = require('express');
-const bcryptjs = require('bcryptjs');
+const { request, response } = require("express");
+const bcryptjs = require("bcryptjs");
 
-
-const User = require('../models/user');
-const { generateJWT } = require('../helpers/generateJWT');
-const { googleVerify } = require('../helpers/google-verify');
+const User = require("../models/user");
+const { generateJWT } = require("../helpers/generateJWT");
+const { googleVerify } = require("../helpers/google-verify");
 
 const login = async (req = request, res = response) => {
+  const { mail, password } = req.body;
 
-	const { mail, password } = req.body;
+  try {
+    //Verify if Email exist
 
-	try {
+    const user = await User.findOne({
+      $or: [{ mail }, { userName: mail }],
+    });
 
-		//Verify if Email exist
+    if (!user) {
+      return res.status(400).json({
+        msg: "User / password aren't correct",
+      });
+    }
 
-		const user = await User.findOne({ mail });
+    //Verify if User is active in the DB and exist
+    if (!user.status) {
+      return res.status(400).json({
+        msg: "User not exits in the DB",
+      });
+    }
 
-		if (!user) {
-			return (res.status(400).json({
-				msg: "User / password aren't correct"
-			}));
-		}
+    //Verify Password
 
-		//Verify if User is active in the DB and exist
-		if (!user.status) {
-			return (res.status(400).json({
-				msg: "User not exits in the DB"
-			}));
-		}
+    const validPassword = bcryptjs.compareSync(password, user.password);
 
-		//Verify Password
+    if (!validPassword)
+      return res.status(400).json({
+        msg: "User / password aren't correct",
+      });
 
-		const validPassword = bcryptjs.compareSync(password, user.password);
+    //generate JWT
 
-		if (!validPassword) return (res.status(400).json({
-			msg: "User / password aren't correct"
-		}));
+    const token = await generateJWT(user.id);
 
-
-		//generate JWT
-
-		const token = await generateJWT(user.id);
-
-
-		res.json({
-			user,
-			token
-		});
-
-
-	} catch (error) {
-		console.log("🚀 ~ file: auth.controller.js:14 ~ login ~ error", error);
-		throw new Error(res.status(500).json({
-			msg: 'has been an error, talk with backend administrator'
-		}));
-	}
-
+    res.json({
+      user,
+      token,
+    });
+  } catch (error) {
+    throw new Error(
+      res.status(500).json({
+        msg:
+          "has been an error, talk with backend administrator, error: " + error,
+      })
+    );
+  }
 };
 
 const googleSignIn = async (req = request, res = response) => {
+  const { id_token } = req.body;
+  try {
+    const { mail, image, name } = await googleVerify(id_token);
 
-	const { id_token } = req.body;
-	try {
+    let user = await User.findOne({ mail });
 
-		const { mail, image, name } = await googleVerify(id_token);
+    if (!user) {
+      //I have  to create a new user
+      const data = {
+        name,
+        mail,
+        image,
+        password: "12345678",
+        google: true,
+      };
+      user = new User(data);
+      await user.save();
+    }
 
-		let user = await User.findOne({ mail });
+    //If user exist in DB
+    if (!user.status)
+      return res
+        .status(401)
+        .json({ msg: "Talk with the administrator, user blocked" });
 
-		if (!user) {
-			//I have  to create a new user
-			const data = {
-				name, mail, image, password: ':P', google: true
-			};
-			user = new User(data);
-			await user.save();
-		}
+    //generate JWT
+    const token = await generateJWT(user.id);
 
-		//If user exist in DB
-		if (!user.status) return res.status(401).json({ msg: 'Talk with the administrator, user blocked' });
-
-		//generate JWT
-		const token = await generateJWT(user.id);
-
-		res.json({
-			msg: "Everything is ok Google SignIn",
-			user, token
-		});
-
-	} catch (error) {
-		res.status(400).json({
-			msg: "Google Token is not valid"
-		});
-	}
-
-
-}
+    res.json({
+      msg: "Everything is ok Google SignIn",
+      user,
+      token,
+    });
+  } catch (error) {
+    res.status(400).json({
+      msg: "Google Token is not valid",
+    });
+  }
+};
 
 module.exports = {
-	login,
-	googleSignIn
+  login,
+  googleSignIn,
 };

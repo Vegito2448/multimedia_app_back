@@ -14,7 +14,7 @@ const googleVerify = async (idToken = '') => {
 
   return { name, image, mail };
 };
-googleVerify().catch(console.error);
+// googleVerify().catch(console.error);
 
 module.exports = {
   googleVerify

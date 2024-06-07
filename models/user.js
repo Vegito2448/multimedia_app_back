@@ -1,41 +1,53 @@
-const {Schema,model} = require('mongoose');
+const { Schema, model } = require("mongoose");
+
+const uniqueValidator = require("mongoose-unique-validator");
+
 const UserSchema = Schema({
-  name:{
-    type:String,
-    required:[true,'name is mandatory']
+  name: {
+    type: String,
   },
-  mail:{
-    type:String,
-    required:[true,'mail is mandatory'],
-    unique:true
+  userName: {
+    type: String,
+    required: [true, "username is mandatory"],
+    unique: true,
   },
-  password:{
-    type:String,
-    required:[true,'password is mandatory']
+  mail: {
+    type: String,
+    required: [true, "mail is mandatory"],
+    unique: true,
   },
-  image:{
-    type:String
+  password: {
+    type: String,
+    required: [true, "password is mandatory"],
   },
-  role:{
-    type:String,
-    required:true,
-    default: 'USER_ROLE',
-    emun:['ADMIN_ROLE', 'USER_ROLE']
+  image: {
+    type: String,
   },
-  status:{
-    type:Boolean,
-    default:true
+  role: {
+    type: String,
+    required: true,
+    default: "reader",
+    enum: ["admin", "creator", "reader"],
   },
-  google:{
-    type:Boolean,
-    default:false
-  }
+  status: {
+    type: Boolean,
+    default: true,
+  },
+  google: {
+    type: Boolean,
+    default: false,
+  },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User" }, // Referencia al usuario administrador,
+  updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+  deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
-UserSchema.methods.toJSON = function(){
+UserSchema.methods.toJSON = function () {
   const { __v, password, _id, ...user } = this.toObject();
-  user.uid = _id
+  user.uid = _id;
   return user;
-}
+};
 
-module.exports = model('User',UserSchema);
+UserSchema.plugin(uniqueValidator, { message: "{PATH} must be unique" });
+
+module.exports = model("User", UserSchema);

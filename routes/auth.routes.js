@@ -9,7 +9,7 @@ const { login, googleSignIn } = require('../controllers/auth.controller');
 
 
 router.post('/login', [
-	check('mail', "mail is Mandatory").isEmail(),
+	check('mail', "mail is Mandatory").not().isEmpty(),
 	check('password', "password is Mandatory").not().isEmpty(),
 	validateFields,
 ], login);

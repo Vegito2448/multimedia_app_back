@@ -8,16 +8,17 @@ const isAdminRole = (req = request, res = response, next) => {
 
   const { role, name } = req.user;
 
-  if (role !== 'ADMIN_ROLE') return res.status(401).json({
-    msg: `${name}: doesn't have permission to take this action`
-  });
+  if (role !== "admin")
+    return res.status(401).json({
+      msg: `${name}: doesn't have permission to take this action`,
+    });
 
   next();
 
 };
 
 const hasRole = (...roles) => (req = request, res = response, next) => {
-  console.log("🚀 ~ file: validate-roles.js:20 ~ hasRole ~ roles", roles);
+
   const { user } = req;
   if (!user) return res.status(500).json({
     msg: "We required to verify the role without validate first the token"
