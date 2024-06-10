@@ -110,10 +110,18 @@ const updateImageCloudinary = async (req = request, res = response) => {
     });
   }
   const { tempFilePath } = req.files.file;
+
   const { secure_url } = await cloudinary.uploader.upload(tempFilePath);
+
   // const name = await upFile(req.files, ['png', 'jpg', 'jpeg', 'gif'], collection);
-  model.filePath = secure_url;
+
+  if (collection === "user") {
+    model.image = secure_url;
+  } else {
+    model.filePath = secure_url;
+  }
   await model.save();
+
   return res.json({
     collection,
     model,

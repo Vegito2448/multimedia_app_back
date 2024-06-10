@@ -38,4 +38,11 @@ const validateJWT = async (req = request, res = response, next) => {
 
 
 };
-module.exports = { validateJWT };
+
+const conditionalValidateJWT = (req, res, next) => {
+  if (req.header("x-token")) {
+    return validateJWT(req, res, next);
+  }
+  next();
+};
+module.exports = { validateJWT, conditionalValidateJWT };

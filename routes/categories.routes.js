@@ -34,7 +34,6 @@ router.post(
     validateJWT,
     check("name", "The name is mandatory").not().isEmpty(),
     // verify that allowedContentTypes is an array of mongoId
-    check("type").isIn(["image", "video", "audio", "document"]),
     validateFields,
   ],
   createCategory
@@ -48,7 +47,6 @@ router.put(
     check("id", "is not a valid ID").isMongoId(),
     check("id").custom(existsCategory),
     check("name", "The name is mandatory").not().isEmpty(),
-    check("type").isIn(["image", "video", "audio", "document"]),
     validateFields,
   ],
   updateCategory

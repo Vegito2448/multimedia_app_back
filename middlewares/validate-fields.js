@@ -32,7 +32,7 @@ const isValidMongoIdArray = (req, res, next) => {
   }
 };
 
-function verificarAllowedContentTypes(allowedContentTypes) {
+function verifyAllowedContentTypes(allowedContentTypes) {
   const permittedValues = ["image", "video", "txt", "audio", "document"];
   if (!Array.isArray(allowedContentTypes) || allowedContentTypes.length === 0) {
     return false;
@@ -46,7 +46,7 @@ function verificarAllowedContentTypes(allowedContentTypes) {
 
 const validateAllowedContentTypes = (req, res, next) => {
   const { allowedContentTypes } = req.body;
-  if (!verificarAllowedContentTypes(allowedContentTypes)) {
+  if (!verifyAllowedContentTypes(allowedContentTypes)) {
     return res.status(400).json({
       msg: "allowedContentTypes should be an array with unique values and should contain only image, video, text, audio or document",
     });

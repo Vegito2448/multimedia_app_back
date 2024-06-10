@@ -12,9 +12,9 @@ const getCategories = async (req = request, res = response) => {
     const [total, categories] = await Promise.all([
       Category.countDocuments(query),
       Category.find(query)
-        .populate("createdBy", "name")
-        .populate("updatedBy", "name")
-        .populate("deletedBy", "name")
+        .populate("createdBy", "userName")
+        .populate("updatedBy", "userName")
+        .populate("deletedBy", "userName")
         .skip(parseInt(from))
         .limit(parseInt(limit)),
     ]);

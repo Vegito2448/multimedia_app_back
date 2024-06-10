@@ -60,7 +60,17 @@ const googleSignIn = async (req = request, res = response) => {
   try {
     const { mail, image, name } = await googleVerify(id_token);
 
-    let user = await User.findOne({ mail });
+    let user = await User.findOneAndUpdate(
+      { mail },
+      {
+        $set: {
+          google: true,
+        },
+      },
+      {
+        new: true,
+      }
+    );
 
     if (!user) {
       //I have  to create a new user
@@ -71,21 +81,29 @@ const googleSignIn = async (req = request, res = response) => {
         password: "12345678",
         google: true,
       };
+
       user = new User(data);
+
       await user.save();
+
+      User.populate(user, {
+        path: "createdBy",
+        select: "name",
+        path: "updatedBy",
+        select: "name",
+      });
     }
 
     //If user exist in DB
     if (!user.status)
-      return res
-        .status(401)
-        .json({ msg: "Talk with the administrator, user blocked" });
+      return res.status(401).json({
+        msg: "Talk with the administrator, the user was previously deleted",
+      });
 
     //generate JWT
     const token = await generateJWT(user.id);
 
-    res.json({
-      msg: "Everything is ok Google SignIn",
+    res.status(200).json({
       user,
       token,
     });

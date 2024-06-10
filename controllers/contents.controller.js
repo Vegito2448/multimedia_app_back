@@ -4,13 +4,16 @@ const { Content } = require("../models");
 
 // getContents - paginated - total - populate
 const getContents = async (req = request, res = response) => {
-  const { limit = 5, from = 0 } = req.query;
+  const { limit = 5, from = 0, topic } = req.query;
   const query = { status: true };
   try {
     const [total, contents] = await Promise.all([
       Content.countDocuments(query),
       Content.find(query)
-        .populate("createdBy", "name")
+        .populate({
+          path: "createdBy",
+          select: "userName image",
+        })
         .populate("updatedBy", "name")
         .populate("deletedBy", "name")
         .populate("topic", "name")
@@ -31,6 +34,7 @@ const getContents = async (req = request, res = response) => {
     });
   }
 };
+
 // getContent - populate {}
 const getContent = async (req = request, res = response) => {
   const { id } = req.params;
@@ -42,7 +46,10 @@ const getContent = async (req = request, res = response) => {
       .populate("topic", "name")
       .populate("category", "name");
 
-    return res.status(200).json(content);
+    return res.status(200).json({
+      msg: "Content found",
+      content,
+    });
   } catch (error) {
     throw new Error(
       res.status(500).json({
@@ -65,32 +72,31 @@ const createContent = async (req = request, res = response) => {
   } = req.body;
   title = title.toUpperCase();
 
+  const data = {
+    title,
+    createdBy,
+    description,
+    type,
+    url,
+    filePath,
+    category,
+    topic,
+  };
+
+  const newContent = new Content(data);
+
   try {
-    //Verify if Content exist
-
-    const content = await Content.findOne({ title });
-
-    if (content) {
-      return res.status(400).json({
-        msg: "Content already exist",
-      });
-    }
-
-    const data = {
-      title,
-      createdBy,
-      description,
-      type,
-      url,
-      filePath,
-      category,
-      topic,
-    };
-
-    const newContent = new Content(data);
     await newContent.save();
 
-    return res.status(201).json(newContent);
+    await Content.populate(newContent, {
+      path: "createdBy",
+      select: "name",
+    });
+
+    return res.status(201).json({
+      msg: "Content created",
+      content: newContent,
+    });
   } catch (error) {
     throw new Error(
       res.status(500).json({
@@ -130,7 +136,10 @@ const updateContent = async (req = request, res = response) => {
       .populate("deletedBy", "name")
       .populate("createdBy", "name");
 
-    return res.status(200).json(content);
+    return res.status(200).json({
+      msg: "Content updated",
+      content,
+    });
   } catch (error) {
     throw new Error(
       res.status(500).json({

@@ -51,12 +51,15 @@ const findContents = async (term = "", res = response) => {
       .populate("topic", "name");
 
     if (content)
-      return res.json({
+      return res.status(200).json({
         results: content ? [content] : [],
       });
 
     const userContent = await Content.find({
-      user: new ObjectId(term),
+      $or: [
+        { createdBy: new ObjectId(term) },
+        { updatedBy: new ObjectId(term) },
+      ],
       status: true,
     })
       .populate("createdBy", ["name", "mail"])
@@ -66,7 +69,7 @@ const findContents = async (term = "", res = response) => {
       .populate("topic", "name");
 
     if (userContent.length)
-      return res.json({
+      return res.status(200).json({
         results: userContent,
       });
 
@@ -79,21 +82,29 @@ const findContents = async (term = "", res = response) => {
       .populate("updatedBy", ["name", "mail"])
       .populate("deletedBy", ["name", "mail"]);
 
-    return res.json({
-      results: categoryContent,
+    if (categoryContent.length)
+      return res.status(200).json({
+        results: categoryContent,
+      });
+
+    const topicContent = await Content.find({
+      status: true,
+      topic: new ObjectId(term),
+    })
+      .populate("category", "name")
+      .populate("createdBy", ["name", "mail"])
+      .populate("updatedBy", ["name", "mail"])
+      .populate("deletedBy", ["name", "mail"]);
+
+    return res.status(200).json({
+      results: topicContent,
     });
   }
 
   const regex = new RegExp(term, "i");
 
   const contents = await Content.find({
-    $or: [
-      { title: regex },
-      { description: regex },
-      { type: regex },
-      { url: regex },
-      { filePath: regex },
-    ],
+    $or: [{ title: regex }, { description: regex }],
     $and: [{ status: true }],
   })
     .populate("createdBy", ["name", "mail"])
@@ -107,6 +118,8 @@ const findContents = async (term = "", res = response) => {
     results: contents,
   });
 };
+
+
 const findTopics = async (term = "", res = response) => {
   const isMongoId = ObjectId.isValid(term);
 
