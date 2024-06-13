@@ -101,7 +101,7 @@ const config = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: "@shelf/jest-mongodb",
+  // preset: "@shelf/jest-mongodb",
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -136,7 +136,7 @@ const config = {
   // setupFiles: [],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  setupFilesAfterEnv: ["<rootDir>/setup.js"],
+  // setupFilesAfterEnv: ["<rootDir>/setup.js"],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,

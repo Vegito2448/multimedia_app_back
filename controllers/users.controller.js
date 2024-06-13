@@ -5,23 +5,31 @@ const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
 
 const usersGet = async (req = request, res = response) => {
-  const { limit = 5, from = 0 } = req.query;
+  let { limit = 5, from = 0 } = req.query;
+  limit = parseInt(limit) > 0 ? parseInt(limit) : 5;
+  from = parseInt(from) > 0 ? parseInt(from) : 0;
+
   const query = { status: true };
 
-  const [total, users] = await Promise.all([
-    User.countDocuments(query),
-    User.find(query)
-      .skip(parseInt(from))
-      .limit(parseInt(limit))
-      .populate("createdBy", "name")
-      .populate("updatedBy", "name")
-      .populate("deletedBy", "name"),
-  ]);
+  try {
+    const [total, users] = await Promise.all([
+      User.countDocuments(query),
+      User.find(query)
+        .lean()
+        .skip(from)
+        .limit(limit),
+    ]);
 
-  res.json({
-    total,
-    users,
-  });
+    res.json({
+      total,
+      users,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error al obtener los usuarios, Error: " + error.message,
+    });
+  }
 };
 
 const userGet = async (req = request, res = response) => {

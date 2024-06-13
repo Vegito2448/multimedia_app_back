@@ -1,8 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-const {dbConnection} = require('../database/config.db');
-const topic = require("./topic");
+const { dbConnection } = require("../database/config.db");
 
 class Server {
   constructor() {
@@ -63,7 +62,7 @@ class Server {
   }
 
   listen() {
-    this.app.listen(this.port, () =>
+    return this.app.listen(this.port, () =>
       console.log("Server running at port: ", this.port)
     );
   }

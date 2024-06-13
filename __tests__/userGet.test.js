@@ -1,53 +1,51 @@
-// Add mongoose to the top of your test file
 const mongoose = require("mongoose");
-const { userGet } = require("../controllers/users.controller");
+const supertest = require("supertest");
 const { User } = require("../models");
+const { app, server } = require("../app");
 
-// Mock database connection
-jest.mock("../database/config.db", () => {
-  const mongooseMock = require("mongoose");
-  return { connect: jest.fn().mockResolvedValue(mongooseMock) };
+const api = supertest(app);
+
+const initialUsers = [
+  {
+    name: "Armando Arellano",
+    mail: "arellano@mail.com",
+    password: "12345678",
+    role: "admin",
+    userName: "arellano",
+    google: false,
+    status: true,
+  },
+  {
+    name: "Juan Perez",
+    mail: "perez@mail.com",
+    password: "12345678",
+    role: "creator",
+    userName: "perez",
+    google: false,
+    status: true,
+  },
+];
+
+beforeEach(async () => {
+  await User.deleteMany({});
+  await User.insertMany(initialUsers);
 });
 
-// Mock User model
-jest.mock("../models/user", () => {
-  return {
-    findOne: jest.fn().mockResolvedValue({
-      // Mocked user object
-      _id: "6664fcb47064b414ee048e5a",
-      name: "Test User",
-      email: "test@example.com",
-    }),
-  };
+afterAll(() => {
+  mongoose.connection.close();
+  server.close();
 });
 
-describe("userGet", () => {
-  let req, res;
-
-  beforeAll(async () => {
-    // No actual DB connection needed, using mock
+describe("GET /api/users", () => {
+  it("respond with json containing a list of all users", async () => {
+    await api
+      .get("/api/users")
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
   });
 
-  afterAll(async () => {
-    await mongoose.disconnect();
-  });
-
-  beforeEach(() => {
-    req = { params: { id: "6664fcb47064b414ee048e5a" } };
-    res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-  });
-
-  it("should return a user successfully", async () => {
-    await userGet(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      _id: "6664fcb47064b414ee048e5a",
-      name: "Test User",
-      email: "test@example.com",
-    });
+  it("respond with json containing a list of all users", async () => {
+    const response = await api.get("/api/users");
+    expect(response.body.users).toHaveLength(initialUsers.length);
   });
 });

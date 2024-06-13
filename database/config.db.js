@@ -1,14 +1,23 @@
-const mongoose = require('mongoose');
+require("dotenv").config();
+const mongoose = require("mongoose");
 
-const uri = process.env.MONGODB_CNN || global.__MONGO_URI__;
+const { MONGODB_CNN, MONGODB_CNN_TEST, NODE_ENV } = process.env;
+
+console.log(`🚀 ~ MONGODB_CNN:`, MONGODB_CNN);
+
+console.log(`🚀 ~ MONGODB_CNN_TEST:`, MONGODB_CNN_TEST);
+
+console.log(`🚀 ~ NODE_ENV:`, NODE_ENV);
+
+const uri = NODE_ENV === "test" ? MONGODB_CNN_TEST : MONGODB_CNN;
+
+console.log(`🚀 ~ uri:`, uri);
 
 const dbConnection = async () =>
-  await mongoose
-    .connect(process.env.MONGODB_CNN)
-    .then(() => console.log("connected to MongoDB"));
+  await mongoose.connect(uri).then(() => console.log("connected to MongoDB"));
 
 dbConnection().catch(console.log);
 
 module.exports = {
-  dbConnection
-}
+  dbConnection,
+};
