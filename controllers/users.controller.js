@@ -52,7 +52,10 @@ const userGet = async (req = request, res = response) => {
 };
 
 const usersPost = async (req = request, res = response) => {
-  const { _id: createdBy } = req.user;
+
+  console.log(`🚀 ~ usersPost ~ req:`, req);
+
+  const createdBy = req.user?._id ?? null;
 
   const file = req?.files?.file;
 
@@ -80,11 +83,6 @@ const usersPost = async (req = request, res = response) => {
     }
 
     await user.save();
-
-    await User.populate(user, {
-      path: "createdBy",
-      select: "name",
-    });
 
     return res.status(201).json(user);
   } catch (error) {
