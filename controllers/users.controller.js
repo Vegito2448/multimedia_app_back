@@ -14,10 +14,7 @@ const usersGet = async (req = request, res = response) => {
   try {
     const [total, users] = await Promise.all([
       User.countDocuments(query),
-      User.find(query)
-        .lean()
-        .skip(from)
-        .limit(limit),
+      User.find(query).lean().skip(from).limit(limit),
     ]);
 
     res.json({
@@ -25,7 +22,6 @@ const usersGet = async (req = request, res = response) => {
       users,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       message: "Error al obtener los usuarios, Error: " + error.message,
     });
@@ -52,9 +48,6 @@ const userGet = async (req = request, res = response) => {
 };
 
 const usersPost = async (req = request, res = response) => {
-
-  console.log(`🚀 ~ usersPost ~ req:`, req);
-
   const createdBy = req.user?._id ?? null;
 
   const file = req?.files?.file;
@@ -78,8 +71,6 @@ const usersPost = async (req = request, res = response) => {
         model: user,
         collection: "user",
       });
-
-      console.log(`🚀 ~ usersPost ~ secure_url:`, secure_url);
     }
 
     await user.save();
@@ -128,8 +119,6 @@ const usersPut = async (req = request, res = response) => {
 
     await user.save();
 
-    console.log(user);
-
     await User.populate(user, {
       path: "createdBy",
       select: "name",
@@ -149,26 +138,27 @@ const usersPut = async (req = request, res = response) => {
 
 const usersDelete = async (req = request, res = response) => {
   const { id } = req.params;
-  const { _id: deletedBy } = req.user;
+  // const { _id: deletedBy } = req.user;
+  const deletedBy = req.user?._id ?? null;
 
   //Physical delete this action isn't recommended
   // const user = await User.findByIdAndDelete(id);
 
   try {
-    const user = await User.findByIdAndUpdate(id, {
-      status: false,
-      deletedBy,
-      updatedBy: deletedBy,
-      deletedAt: new Date(),
-    })
-      .populate("deletedBy", "name")
-      .populate("createdBy", "name")
-      .populate("updatedBy", "name");
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        status: false,
+        deletedBy,
+        updatedBy: deletedBy,
+        deletedAt: new Date(),
+      },
+      {
+        new: true,
+      }
+    );
 
-    res.status(200).json({
-      msg: "User Deleted",
-      user,
-    });
+    res.status(204).send();
   } catch (error) {
     return res.status(500).json({
       msg:

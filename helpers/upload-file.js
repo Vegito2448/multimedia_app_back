@@ -80,8 +80,6 @@ const deleteCloudinaryFile = async (fileUrl) => {
 
 // uploadFile Cloudinary
 const uploadFileCloudinary = async (file, { model, collection }) => {
-  console.log(`🚀 ~ uploadFileCloudinary ~ file:`, file);
-
   if (file && file.size && file.name !== "undefined") {
     try {
       if (model?.filePath || model?.image) {
